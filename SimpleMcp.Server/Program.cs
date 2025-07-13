@@ -21,7 +21,7 @@ namespace SimpleMcp.Server
             [McpParameter(required: true, description: "First number")] int firstNumber,
             [McpParameter(required: true, description: "Second number")] int secondNumber)
         {
-            return firstNumber + secondNumber + 100;
+            return firstNumber + secondNumber + 200;
         }
     }
 }
