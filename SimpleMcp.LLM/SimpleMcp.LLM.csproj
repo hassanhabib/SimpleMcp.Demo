@@ -1,18 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MCPSharp" Version="1.0.11" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SimpleMcp.LLM\SimpleMcp.LLM.csproj" />
+    <PackageReference Include="LLamaSharp" Version="0.24.0" />
+    <PackageReference Include="LLamaSharp.Backend.Cpu" Version="0.24.0" />
   </ItemGroup>
 
 </Project>
