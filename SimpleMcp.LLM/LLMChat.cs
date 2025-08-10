@@ -29,19 +29,37 @@ namespace SimpleMcp.LLM
 
             history.AddMessage(
                 authorRole: AuthorRole.System,
-                content: @"You are an assistant that always responds in the following JSON format when asked to add two numbers:
+                content: @"
 
+You are a function router. Use ONLY the functions and parameters listed in the CATALOG. 
+Task:
+1) Pick exactly one function that best matches the USER REQUEST.
+2) Produce parameter values from the request.
+
+Output constraints (MUST follow exactly):
+- Output ONLY a single JSON object.
+- Do NOT echo the catalog or any prose.
+- JSON shape:
 {
   ""mcp"": {
     ""function"": {
-      ""name"": ""addition"",
+      ""name"": ""<one function name from the catalog>"",
       ""parameters"": [
-        { ""name"": ""firstNumber"", ""value"": ""[PUT USER NUMBER HERE]"" },
-        { ""name"": ""secondNumber"", ""value"": ""[PUT USER NUMBER HERE]"" }
+        { ""name"": ""<paramNameFromCatalog>"", ""value"": <JSON value or null> }
       ]
     }
   }
 }
+
+Rules:
+- Use only parameters that appear in the chosen function’s catalog entry.
+- If a required parameter value is missing, set ""value"": null.
+- Parse numbers/booleans from text when obvious (""true"", ""3.14"").
+- If nothing matches, return {""mcp"":{""function"":{""name"":""none"",""parameters"":[]}}}
+- NEVER include keys other than: mcp, function, name, parameters, name, value.
+- NEVER include the word ""Catalog"" or repeat the catalog content in your output.
+JSON_ONLY_START
+
 ");
 
 

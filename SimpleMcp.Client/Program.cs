@@ -1,8 +1,8 @@
 ﻿using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using MCPSharp;
 using MCPSharp.Model;
-using Newtonsoft.Json;
 using SimpleMcp.LLM;
 
 namespace SimpleMcp.Client
@@ -11,24 +11,56 @@ namespace SimpleMcp.Client
     {
         static async Task Main(string[] args)
         {
+            var client = new MCPClient(
+               name: "McpClient",
+               version: "v1.0.0",
+               server: "D:\\source\\repos\\SimpleMcp\\SimpleMcp.Server\\bin\\Debug\\net9.0\\SimpleMcp.Server.exe");
+
             const string llm = @"C:\Users\hassa\OneDrive\Desktop\AI Resources\mistral-7b-instruct-v0.1.Q8_0.gguf";
+
+            var functions = await client.GetFunctionsAsync();
+
+            var catalog = new
+            {
+                catalog = new
+                {
+                    functions = functions.Select(function => new
+                    {
+                        name = function.Name,
+                        schema = function.JsonSchema
+                    })
+                }
+            };
+
+            var jsonOpts = new JsonSerializerOptions { WriteIndented = true };
+            string functionCatalog = JsonSerializer.Serialize(catalog, jsonOpts);
+
+            string userPrompt = "What do we get when we subtract 5 from ten from 20.";
+
+            string prompt = @$"
+CATALOG:
+{functionCatalog}
+
+USER REQUEST:
+{userPrompt}
+
+Respond with JSON only. Begin your output with ""{{"" and end with ""}}"".
+JSON_ONLY_END
+";
 
             var llmChat = new LLMChat(llm);
             string fullResponse = "";
 
-            await foreach (string response in llmChat.SendAsync("Give me the outcome of 22 added to 55."))
+            await foreach (string response in llmChat.SendAsync(prompt))
             {
                 Console.Write(response);
                 fullResponse += response;
             }
 
             string json = ExtractFirstJsonObject(fullResponse);
-            McpRoot mcpRoot = JsonConvert.DeserializeObject<McpRoot>(json);
+            McpRoot mcpRoot = JsonSerializer.Deserialize<McpRoot>(json);
 
-            var client = new MCPClient(
-                name: "McpClient",
-                version: "v1.0.0",
-                server: "D:\\source\\repos\\SimpleMcp\\SimpleMcp.Server\\bin\\Debug\\net9.0\\SimpleMcp.Server.exe");
+           
 
             var result = await client.CallToolAsync(
                 name: mcpRoot.Mcp.Function.Name,
